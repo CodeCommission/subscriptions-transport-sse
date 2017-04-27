@@ -1,15 +1,15 @@
-# subscriptions-transport-http2
+# subscriptions-transport-sse
 
 **(Work in progress!)**
 
-A GraphQL HTTP2/SPDY server and client to facilitate GraphQL subscriptions.
+A GraphQL Server-Side-Evenet (SSE) server and client to facilitate GraphQL subscriptions.
 
 ## Getting Started
 
 ```bash
 Using Yarn:
-$ yarn add subscriptions-transport-http2
+$ yarn add subscriptions-transport-sse
 
 Or, using NPM:
-$ npm install --save subscriptions-transport-http2
+$ npm install --save subscriptions-transport-sse
 ```
