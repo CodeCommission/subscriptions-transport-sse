@@ -1,6 +1,6 @@
 .DS_Store
 node_modules
 npm-debug
-browser
-dist
+src
+test
 example
