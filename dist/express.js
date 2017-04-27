@@ -48,7 +48,9 @@ function SubscriptionServer(subscriptionOptions, connectionOptions) {
     res.setHeader('Content-Type', 'text/event-stream');
 
     req.connection.on('close', function () {
-      if (subscriptionOptions.subscriptionManager.subscriptions[connectionSubscriptionId]) subscriptionOptions.subscriptionManager.unsubscribe(connectionSubscriptionId);
+      if (subscriptionOptions.subscriptionManager.subscriptions[connectionSubscriptionId]) {
+        subscriptionOptions.subscriptionManager.unsubscribe(connectionSubscriptionId);
+      }
     });
 
     emitter.on('event-' + connectionSubscriptionId, function (error, data) {
@@ -56,5 +58,8 @@ function SubscriptionServer(subscriptionOptions, connectionOptions) {
     });
 
     res.write('data: ' + (0, _stringify2.default)({ type: 'SUBSCRIPTION_SUCCESS', subId: connectionSubscriptionId }) + '\n\n');
+    setInterval(function () {
+      return res.write('data: ' + (0, _stringify2.default)({ type: 'KEEPALIVE', subId: connectionSubscriptionId }) + '\n\n');
+    }, 1000);
   });
 }

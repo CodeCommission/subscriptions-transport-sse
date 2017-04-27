@@ -71,19 +71,31 @@ var SubscriptionClient = exports.SubscriptionClient = function () {
 
         evtSource.onmessage = function (e) {
           var message = JSON.parse(e.data);
-
           switch (message.type) {
             case 'SUBSCRIPTION_DATA':
               _this.subscriptions[subId].handler(null, message.data);
               break;
+            case 'KEEPALIVE':
+              break;
           }
 
-          // TODO: cleanup subscription + reconnect
           evtSource.onerror = function (e) {
-            return console.error('EventSource connection failed for subscription ID: ' + subId + '.');
+            console.error('EventSource connection failed for subscription ID: ' + subId + '. Retry.');
+            if (_this.subscriptions[subId] && _this.subscriptions[subId].evtSource) {
+              _this.subscriptions[subId].evtSource.close();
+            }
+            delete _this.subscriptions[subId];
+            setTimeout(function () {
+              return _this.subscribe(options, handler);
+            }, 1000);
           };
         };
         return subId;
+      }).catch(function (error) {
+        console.error(error.message + '. Subscription failed. Retry.');
+        setTimeout(function () {
+          return _this.subscribe(options, handler);
+        }, 1000);
       });
     }
   }, {
@@ -110,9 +122,6 @@ var SubscriptionClient = exports.SubscriptionClient = function () {
   }]);
   return SubscriptionClient;
 }();
-
-// Quick way to add the subscribe and unsubscribe functions to the network interface
-
 
 function addGraphQLSubscriptions(networkInterface, spdyClient) {
   return (0, _assign2.default)(networkInterface, {

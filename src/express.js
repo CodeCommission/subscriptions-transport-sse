@@ -32,7 +32,9 @@ function SubscriptionServer(subscriptionOptions, connectionOptions) {
     res.setHeader('Content-Type', 'text/event-stream')
 
     req.connection.on('close', () => {
-      if(subscriptionOptions.subscriptionManager.subscriptions[connectionSubscriptionId]) subscriptionOptions.subscriptionManager.unsubscribe(connectionSubscriptionId)
+      if(subscriptionOptions.subscriptionManager.subscriptions[connectionSubscriptionId]) {
+        subscriptionOptions.subscriptionManager.unsubscribe(connectionSubscriptionId)
+      }
     })
 
     emitter.on(`event-${connectionSubscriptionId}`, (error, data) => {
@@ -40,5 +42,6 @@ function SubscriptionServer(subscriptionOptions, connectionOptions) {
     })
 
     res.write(`data: ${JSON.stringify({type: 'SUBSCRIPTION_SUCCESS', subId: connectionSubscriptionId})}\n\n`)
+    setInterval(() => res.write(`data: ${JSON.stringify({type: 'KEEPALIVE', subId: connectionSubscriptionId})}\n\n`), 1000)
   })
 }

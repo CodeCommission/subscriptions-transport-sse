@@ -30,17 +30,28 @@ export class SubscriptionClient {
 
       evtSource.onmessage = e => {
         const message = JSON.parse(e.data)
-
         switch(message.type) {
           case 'SUBSCRIPTION_DATA':
             this.subscriptions[subId].handler(null, message.data)
             break
+          case 'KEEPALIVE':
+            break
         }
 
-        // TODO: cleanup subscription + reconnect
-        evtSource.onerror = e => console.error(`EventSource connection failed for subscription ID: ${subId}.`)
+        evtSource.onerror = e => {
+          console.error(`EventSource connection failed for subscription ID: ${subId}. Retry.`)
+          if(this.subscriptions[subId] && this.subscriptions[subId].evtSource) {
+            this.subscriptions[subId].evtSource.close()
+          }
+          delete this.subscriptions[subId]
+          setTimeout(() => this.subscribe(options, handler), 1000)
+        }
       }
       return subId
+    })
+    .catch(error => {
+      console.error(`${error.message}. Subscription failed. Retry.`)
+      setTimeout(() => this.subscribe(options, handler), 1000)
     })
   }
 
@@ -61,7 +72,6 @@ export class SubscriptionClient {
   }
 }
 
-// Quick way to add the subscribe and unsubscribe functions to the network interface
 export function addGraphQLSubscriptions(networkInterface, spdyClient) {
   return Object.assign(networkInterface, {
     subscribe(request, handler) {
