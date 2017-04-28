@@ -4,7 +4,7 @@
 
 A GraphQL Server-Side-Evenet (SSE) server and client to facilitate GraphQL subscriptions.
 
-> This is a API compatible SSE transport implementation of [subscriptions-transport-ws](https://github.com/apollographql/subscriptions-transport-ws).
+> That's an API compatible SSE transport implementation of [subscriptions-transport-ws](https://github.com/apollographql/subscriptions-transport-ws).
 
 ## Getting Started
 
@@ -37,7 +37,7 @@ Now, use your subscriptionManager, and create your SubscriptionServer:
 ```javascript
 const express = require('express')
 const app = express()
-const expressGraphQLSubscriptionsSSETransport = require('subscriptions-transport-sse/express')
+const expressGraphQLSubscriptionsSSETransport = require('subscriptions-transport-sse')
 
 expressGraphQLSubscriptionsSSETransport.SubscriptionServer({
   onSubscribe: (msg, params) => Object.assign({}, params, { context: { loaders: loaders(), } }),
@@ -55,7 +55,7 @@ app.listen(SERVICE_PORT, () => console.log(`Listen on ${SERVICE_PORT}`))
 For client side, we will use SubscriptionClient, and we also need to extend our network interface to use this transport for GraphQL subscriptions:
 
 ```javascript
-import { SubscriptionClient, addGraphQLSubscriptions } from 'subscriptions-transport-sse/client'
+import { SubscriptionClient, addGraphQLSubscriptions } from 'subscriptions-transport-sse'
 const httpClient = createNetworkInterface({uri: `https://my-graphql.example.com/graphql`})
 const sseClient = new SubscriptionClient(`https://my-graphql.example.com/subscriptions`)
 const apolloClient = new ApolloClient({networkInterface: addGraphQLSubscriptions(httpClient, sseClient)})

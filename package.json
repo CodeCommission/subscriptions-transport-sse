@@ -1,6 +1,24 @@
 {
   "name": "subscriptions-transport-sse",
-  "version": "0.3.0",
+  "version": "0.3.1",
+  "author": "Mike Bild <mike.bild@googlemail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/mikebild/subscriptions-transport-sse#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikebild/subscriptions-transport-sse.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mikebild/subscriptions-transport-sse/issues"
+  },
+  "keywords": [
+    "graphql",
+    "subscriptions",
+    "sse",
+    "expressjs",
+    "transport",
+    "connection"
+  ],
   "main": "dist/express.js",
   "browser": "dist/client.js",
   "files": [
