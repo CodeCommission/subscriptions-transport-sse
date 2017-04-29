@@ -12,7 +12,7 @@ function SubscriptionServer(subscriptionOptions, connectionOptions) {
   emitter.setMaxListeners(0)
 
   connectionOptions.express.post(connectionOptions.path, (req, res) => {
-    const subscription = Object.assign(req.body, subscriptionOptions.onSubscribe())
+    const subscription = Object.assign({}, req.body, subscriptionOptions.onSubscribe())
     let connectionSubscriptionId = 0
 
     subscription.callback = (error, data) => {
@@ -42,6 +42,6 @@ function SubscriptionServer(subscriptionOptions, connectionOptions) {
     })
 
     res.write(`data: ${JSON.stringify({type: 'SUBSCRIPTION_SUCCESS', subId: connectionSubscriptionId})}\n\n`)
-    setInterval(() => res.write(`data: ${JSON.stringify({type: 'KEEPALIVE', subId: connectionSubscriptionId})}\n\n`), 1000)
+    setInterval(() => res.write(`data: ${JSON.stringify({type: 'KEEPALIVE', subId: connectionSubscriptionId})}\n\n`), connectionOptions.keepAliveInterval || 1000)
   })
 }
