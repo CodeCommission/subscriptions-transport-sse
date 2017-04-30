@@ -42,6 +42,6 @@ function SubscriptionServer(subscriptionOptions, connectionOptions) {
     })
 
     res.write(`data: ${JSON.stringify({type: 'SUBSCRIPTION_SUCCESS', subId: connectionSubscriptionId})}\n\n`)
-    setInterval(() => res.write(`data: ${JSON.stringify({type: 'KEEPALIVE', subId: connectionSubscriptionId})}\n\n`), connectionOptions.keepAliveInterval || 1000)
+    setInterval(() => res.write(`data: ${JSON.stringify({type: 'KEEPALIVE', subId: connectionSubscriptionId})}\n\n`), connectionOptions.keepAliveInterval || 30000)
   })
 }
