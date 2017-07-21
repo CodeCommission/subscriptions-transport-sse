@@ -1,5 +1,5 @@
 import {print} from 'graphql/language/printer'
-import {isString,isObject} from 'lodash'
+import {isString, isObject} from 'lodash'
 
 export class SubscriptionClient {
   subscriptions = {}
