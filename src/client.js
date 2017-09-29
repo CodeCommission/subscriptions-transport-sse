@@ -2,12 +2,11 @@ import {print} from 'graphql/language/printer'
 import {isString, isObject} from 'lodash'
 
 export class SubscriptionClient {
-  subscriptions = {}
-
   constructor(url, httpOptions) {
     const {timeout} = httpOptions
     this.url = url
     this.httpTimeout = timeout
+    this.subscriptions = {}
   }
 
   subscribe(options, handler) {
