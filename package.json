@@ -1,6 +1,6 @@
 {
   "name": "subscriptions-transport-sse",
-  "version": "0.5.3",
+  "version": "0.6.3",
   "author": "Mike Bild <mike.bild@googlemail.com>",
   "license": "MIT",
   "homepage": "https://github.com/mikebild/subscriptions-transport-sse#readme",
@@ -21,12 +21,10 @@
   ],
   "main": "dist/express.js",
   "browser": "dist/client.js",
-  "files": [
-    "dist",
-    "browser"
-  ],
+  "files": ["dist", "browser"],
   "scripts": {
-    "build": "babel src -d dist --source-maps --presets=env --plugins=transform-runtime",
+    "build":
+      "babel src -d dist --source-maps --presets=env --plugins=transform-runtime",
     "browser-compile": "webpack --config webpack.config.js",
     "dev": "nodemon --watch src --exec \"npm run build\"",
     "prepublish": "npm run build && npm run browser-compile"
@@ -34,14 +32,14 @@
   "dependencies": {
     "babel-runtime": "^6.23.0",
     "graphql": "^0.11.6",
-    "graphql-subscriptions": "^0.4.4",
+    "graphql-subscriptions": "^0.5.4",
     "lodash": "^4.17.4"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.0",
-    "mocha": "^3.4.2",
+    "mocha": "^4.0.1",
     "nodemon": "^1.11.0",
     "webpack": "^3.6.0"
   }
