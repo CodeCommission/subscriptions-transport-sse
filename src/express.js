@@ -117,26 +117,24 @@ export class SubscriptionManager {
   }
 
   subscribe(options) {
-    // 1. validate the query, operationName and variables
     const parsedQuery = parse(options.query);
     const errors = validate(this.schema, parsedQuery, [
       ...specifiedRules,
       subscriptionHasSingleRootField
     ]);
 
-    // TODO: validate that all variables have been passed (and are of correct type)?
     if (errors.length) {
-      // this error kills the subscription, so we throw it.
       return Promise.reject(new ValidationError(errors));
     }
 
     let args = {};
 
-    // operationName is the name of the only root field in the subscription document
     let subscriptionName = "";
     parsedQuery.definitions.forEach(definition => {
-      if (definition.kind === "OperationDefinition") {
-        // only one root field is allowed on subscription. No fragments for now.
+      if (
+        definition.kind === "OperationDefinition" &&
+        definition.operation === "subscription"
+      ) {
         const rootField = definition.selectionSet.selections[0];
         subscriptionName = rootField.name.value;
 
@@ -167,17 +165,10 @@ export class SubscriptionManager {
     this.subscriptions[externalSubscriptionId] = [];
     const subscriptionPromises = [];
     Object.keys(triggerMap).forEach(triggerName => {
-      // Deconstruct the trigger options and set any defaults
-      const {
-        channelOptions = {},
-        filter = () => true // Let all messages through by default.
-      } = triggerMap[triggerName];
+      const { channelOptions = {}, filter = () => true } = triggerMap[
+        triggerName
+      ];
 
-      // 2. generate the handler function
-      //
-      // rootValue is the payload sent by the event emitter / trigger by
-      // convention this is the value returned from the mutation
-      // resolver
       const onMessage = rootValue => {
         return Promise.resolve()
           .then(() => {
@@ -215,7 +206,6 @@ export class SubscriptionManager {
       );
     });
 
-    // Resolve the promise with external sub id only after all subscriptions completed
     return Promise.all(subscriptionPromises).then(() => externalSubscriptionId);
   }
 
@@ -243,10 +233,9 @@ function subscriptionHasSingleRootField(context) {
         if (selection.kind === "Field") {
           numFields++;
         } else {
-          // why the heck use a fragment on the Subscription type? Just ... don't
           context.reportError(
             new GraphQLError(
-              "Apollo subscriptions do not support fragments on the root field",
+              "Subscriptions do not support fragments on the root field",
               [node]
             )
           );
