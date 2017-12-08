@@ -9,9 +9,9 @@ const {
   ValidationContext,
   SelectionNode,
   FieldNode
-} = require("graphql");
-const { getArgumentValues } = require("graphql/execution/values");
-const EventEmitter = require("events");
+} = require('graphql');
+const {getArgumentValues} = require('graphql/execution/values');
+const EventEmitter = require('events');
 
 export function SubscriptionServer(subscriptionOptions, connectionOptions) {
   const {
@@ -24,7 +24,7 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
   } = subscriptionOptions;
   if (!subscriptionManager)
     throw new Error(
-      "Must provide `subscriptionManager` to EventSource server constructor."
+      'Must provide `subscriptionManager` to EventSource server constructor.'
     );
 
   const emitter = new EventEmitter();
@@ -46,15 +46,15 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
       .subscribe(subscription)
       .then(subId => {
         connectionSubscriptionId = subId;
-        res.send({ subId: subId });
+        res.send({subId: subId});
       });
   });
 
   connectionOptions.express.get(`${connectionOptions.path}/:id`, (req, res) => {
     const connectionSubscriptionId = req.params.id;
-    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader('Content-Type', 'text/event-stream');
 
-    req.connection.on("close", () => {
+    req.connection.on('close', () => {
       if (
         subscriptionOptions.subscriptionManager.subscriptions[
           connectionSubscriptionId
@@ -69,7 +69,7 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
     emitter.on(`event-${connectionSubscriptionId}`, (error, data) => {
       res.write(
         `data: ${JSON.stringify({
-          type: "SUBSCRIPTION_DATA",
+          type: 'SUBSCRIPTION_DATA',
           subId: connectionSubscriptionId,
           data: data.data
         })}\n\n`
@@ -78,7 +78,7 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
 
     res.write(
       `data: ${JSON.stringify({
-        type: "SUBSCRIPTION_SUCCESS",
+        type: 'SUBSCRIPTION_SUCCESS',
         subId: connectionSubscriptionId
       })}\n\n`
     );
@@ -86,7 +86,7 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
       () =>
         res.write(
           `data: ${JSON.stringify({
-            type: "KEEPALIVE",
+            type: 'KEEPALIVE',
             subId: connectionSubscriptionId
           })}\n\n`
         ),
@@ -99,7 +99,7 @@ export class ValidationError extends Error {
   constructor(errors) {
     super();
     this.errors = errors;
-    this.message = "Subscription query has validation errors";
+    this.message = 'Subscription query has validation errors';
   }
 }
 
@@ -129,11 +129,11 @@ export class SubscriptionManager {
 
     let args = {};
 
-    let subscriptionName = "";
+    let subscriptionName = '';
     parsedQuery.definitions.forEach(definition => {
       if (
-        definition.kind === "OperationDefinition" &&
-        definition.operation === "subscription"
+        definition.kind === 'OperationDefinition' &&
+        definition.operation === 'subscription'
       ) {
         const rootField = definition.selectionSet.selections[0];
         subscriptionName = rootField.name.value;
@@ -158,21 +158,21 @@ export class SubscriptionManager {
     } else {
       // if not provided, the triggerName will be the subscriptionName, The trigger will not have any
       // options and rely on defaults that are set later.
-      triggerMap = { [subscriptionName]: {} };
+      triggerMap = {[subscriptionName]: {}};
     }
 
     const externalSubscriptionId = this.maxSubscriptionId++;
     this.subscriptions[externalSubscriptionId] = [];
     const subscriptionPromises = [];
     Object.keys(triggerMap).forEach(triggerName => {
-      const { channelOptions = {}, filter = () => true } = triggerMap[
+      const {channelOptions = {}, filter = () => true} = triggerMap[
         triggerName
       ];
 
       const onMessage = rootValue => {
         return Promise.resolve()
           .then(() => {
-            if (typeof options.context === "function") {
+            if (typeof options.context === 'function') {
               return options.context();
             }
             return options.context;
@@ -227,15 +227,15 @@ function subscriptionHasSingleRootField(context) {
   schema.getSubscriptionType();
   return {
     OperationDefinition(node) {
-      const operationName = node.name ? node.name.value : "";
+      const operationName = node.name ? node.name.value : '';
       let numFields = 0;
       node.selectionSet.selections.forEach(selection => {
-        if (selection.kind === "Field") {
+        if (selection.kind === 'Field') {
           numFields++;
         } else {
           context.reportError(
             new GraphQLError(
-              "Subscriptions do not support fragments on the root field",
+              'Subscriptions do not support fragments on the root field',
               [node]
             )
           );
