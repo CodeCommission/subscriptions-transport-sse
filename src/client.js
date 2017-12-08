@@ -4,13 +4,16 @@ import {isObject} from 'lodash.isobject';
 
 export class SubscriptionClient {
   constructor(url, httpOptions) {
+    this.httpOptions = httpOptions;
     this.url = url;
     this.subscriptions = {};
   }
 
   subscribe(options, handler) {
     const {timeout, headers} =
-      typeof httpOptions === 'function' ? httpOptions() : httpOptions;
+      typeof this.httpOptions === 'function'
+        ? this.httpOptions()
+        : this.httpOptions;
 
     const {query, variables, operationName, context} = options;
     if (!query) throw new Error('Must provide `query` to subscribe.');
