@@ -1,6 +1,7 @@
+import EventSource from 'eventsource';
 import {print} from 'graphql/language/printer';
-import {isString} from 'lodash.isstring';
-import {isObject} from 'lodash.isobject';
+import isString from 'lodash.isstring';
+import isObject from 'lodash.isobject';
 
 export class SubscriptionClient {
   constructor(url, httpOptions) {
@@ -33,12 +34,15 @@ export class SubscriptionClient {
         'Content-Type': 'application/json'
       }),
       body: JSON.stringify(options),
-      timeout: this.timeout || 1000
+      timeout: timeout || 1000
     })
       .then(res => res.json())
       .then(data => {
         const subId = data.subId;
-        const evtSource = new EventSource(`${this.url}/${subId}`);
+
+        const evtSource = new EventSource(`${this.url}/${subId}`, {
+          headers
+        });
         this.subscriptions[subId] = {options, handler, evtSource};
 
         evtSource.onmessage = e => {
@@ -88,6 +92,24 @@ export class SubscriptionClient {
     Object.keys(this.subscriptions).forEach(subId => {
       this.unsubscribe(parseInt(subId));
     });
+  }
+
+  publish(subscription, data) {
+    const {timeout, headers} =
+      typeof this.httpOptions === 'function'
+        ? this.httpOptions()
+        : this.httpOptions;
+
+    return subscription.then(subId =>
+      fetch(`${this.url}/publish/${subId}`, {
+        method: 'POST',
+        headers: Object.assign({}, headers, {
+          'Content-Type': 'application/json'
+        }),
+        body: JSON.stringify(data),
+        timeout: timeout || 1000
+      })
+    );
   }
 }
 

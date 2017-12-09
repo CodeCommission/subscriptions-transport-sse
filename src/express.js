@@ -66,6 +66,17 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
       }
     });
 
+    connectionOptions.express.post(
+      `${connectionOptions.path}/publish/:id`,
+      (req, res) => {
+        const connectionSubscriptionId = req.params.id;
+        const data = req.body || {};
+        res.setHeader('Content-Type', 'application/json');
+        emitter.emit(`event-${connectionSubscriptionId}`, null, {data});
+        res.sendStatus(202);
+      }
+    );
+
     emitter.on(`event-${connectionSubscriptionId}`, (error, data) => {
       res.write(
         `data: ${JSON.stringify({
