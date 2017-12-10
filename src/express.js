@@ -67,12 +67,12 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
     });
 
     connectionOptions.express.post(
-      `${connectionOptions.path}/publish/:id`,
+      `${connectionOptions.path}/publish/:topic?`,
       (req, res) => {
-        const connectionSubscriptionId = req.params.id;
+        const topic = req.params.topic || 'event-web-publish';
         const data = req.body || {};
         res.setHeader('Content-Type', 'application/json');
-        emitter.emit(`event-${connectionSubscriptionId}`, null, {data});
+        subscriptionOptions.subscriptionManager.pubsub.publish(topic, data);
         res.sendStatus(202);
       }
     );
