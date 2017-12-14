@@ -80,7 +80,7 @@ export class SubscriptionClient {
   }
 
   unsubscribe(subscription) {
-    subscription.then(subId => {
+    Promise.resolve(subscription).then(subId => {
       if (this.subscriptions[subId] && this.subscriptions[subId].evtSource) {
         this.subscriptions[subId].evtSource.close();
       }
