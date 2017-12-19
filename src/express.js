@@ -34,7 +34,7 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
     const subscription = Object.assign(
       {},
       req.body,
-      subscriptionOptions.onSubscribe()
+      subscriptionOptions.onSubscribe(req)
     );
     let connectionSubscriptionId = 0;
 

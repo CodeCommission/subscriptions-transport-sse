@@ -1,6 +1,6 @@
 {
   "name": "subscriptions-transport-sse",
-  "version": "0.7.9",
+  "version": "0.7.10",
   "author": "Mike Bild <mike.bild@googlemail.com>",
   "license": "MIT",
   "homepage": "https://github.com/mikebild/subscriptions-transport-sse#readme",
@@ -21,12 +21,10 @@
   ],
   "main": "dist/express.js",
   "browser": "dist/client.js",
-  "files": [
-    "dist",
-    "browser"
-  ],
+  "files": ["dist", "browser"],
   "scripts": {
-    "build": "babel src -d dist --source-maps --presets=env --plugins=transform-runtime",
+    "build":
+      "babel src -d dist --source-maps --presets=env --plugins=transform-runtime",
     "browser-compile": "webpack --config webpack.config.js",
     "dev": "nodemon --watch src --exec \"npm run build\"",
     "prepublish": "npm run build && npm run browser-compile"
