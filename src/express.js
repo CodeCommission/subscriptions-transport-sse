@@ -20,6 +20,7 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
     onUnsubscribe,
     onConnect,
     onDisconnect,
+    onPublish,
     keepAlive
   } = subscriptionOptions;
   if (!subscriptionManager)
@@ -66,17 +67,6 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
       }
     });
 
-    connectionOptions.express.all(
-      `${connectionOptions.path}/publish/:topic?`,
-      (req, res) => {
-        const topic = req.params.topic || 'event-web-publish';
-        const data = req.body || {};
-        res.setHeader('Content-Type', 'application/json');
-        subscriptionOptions.subscriptionManager.pubsub.publish(topic, data);
-        res.sendStatus(202);
-      }
-    );
-
     emitter.on(`event-${connectionSubscriptionId}`, (error, data) => {
       res.write(
         `data: ${JSON.stringify({
@@ -104,6 +94,18 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
       connectionOptions.keepAliveInterval || 30000
     );
   });
+
+  connectionOptions.express.all(
+    `${connectionOptions.path}/publish/:topic?`,
+    (req, res) => {
+      const topic = req.params.topic || 'event-web-publish';
+      const onPublishData = onPublish && onPublish(req);
+      const data = onPublishData || req.body || {};
+      subscriptionOptions.subscriptionManager.pubsub.publish(topic, data);
+      res.setHeader('Content-Type', 'application/json');
+      res.sendStatus(202);
+    }
+  );
 }
 
 export class ValidationError extends Error {
