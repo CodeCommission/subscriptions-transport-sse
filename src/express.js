@@ -66,7 +66,7 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
       }
     });
 
-    connectionOptions.express.post(
+    connectionOptions.express.all(
       `${connectionOptions.path}/publish/:topic?`,
       (req, res) => {
         const topic = req.params.topic || 'event-web-publish';
