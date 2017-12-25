@@ -20,7 +20,6 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
     onUnsubscribe,
     onConnect,
     onDisconnect,
-    onPublish,
     keepAlive
   } = subscriptionOptions;
   if (!subscriptionManager)
@@ -99,8 +98,7 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
     `${connectionOptions.path}/publish/:topic?`,
     (req, res) => {
       const topic = req.params.topic || 'event-web-publish';
-      const onPublishData = onPublish && onPublish(req);
-      const data = onPublishData || req.body || {};
+      const data = req.body || {};
       subscriptionOptions.subscriptionManager.pubsub.publish(topic, data);
       res.setHeader('Content-Type', 'application/json');
       res.sendStatus(202);
