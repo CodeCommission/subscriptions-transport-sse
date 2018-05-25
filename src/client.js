@@ -1,3 +1,4 @@
+import {ApolloLink, Observable} from 'apollo-link';
 import EventSource from 'eventsource';
 import {print} from 'graphql/language/printer';
 import isString from 'lodash.isstring';
@@ -20,12 +21,11 @@ export class SubscriptionClient {
     if (!query) throw new Error('Must provide `query` to subscribe.');
     if (!handler) throw new Error('Must provide `handler` to subscribe.');
     if (
-      !isString(query) ||
       (operationName && !isString(operationName)) ||
       (variables && !isObject(variables))
     )
       throw new Error(
-        'Incorrect option types to subscribe. `subscription` must be a string, `operationName` must be a string, and `variables` must be an object.'
+        'Incorrect option types to subscribe. `operationName` must be a string, and `variables` must be an object.'
       );
 
     return fetch(this.url, {
@@ -49,7 +49,7 @@ export class SubscriptionClient {
           const message = JSON.parse(e.data);
           switch (message.type) {
             case 'SUBSCRIPTION_DATA':
-              this.subscriptions[subId].handler(null, message.data);
+              this.subscriptions[subId].handler(message.data);
               break;
             case 'KEEPALIVE':
               break;
@@ -57,9 +57,7 @@ export class SubscriptionClient {
 
           evtSource.onerror = e => {
             console.error(
-              `EventSource connection failed for subscription ID: ${
-                subId
-              }. Retry.`
+              `EventSource connection failed for subscription ID: ${subId}. Retry.`
             );
             if (
               this.subscriptions[subId] &&
@@ -68,14 +66,20 @@ export class SubscriptionClient {
               this.subscriptions[subId].evtSource.close();
             }
             delete this.subscriptions[subId];
-            setTimeout(() => this.subscribe(options, handler), 1000);
+            const retryTimeout = setTimeout(() => {
+              this.subscribe(options, handler);
+              clearTimeout(retryTimeout);
+            }, 1000);
           };
         };
         return subId;
       })
       .catch(error => {
         console.error(`${error.message}. Subscription failed. Retry.`);
-        setTimeout(() => this.subscribe(options, handler), 1000);
+        const retryTimeout = setTimeout(() => {
+          this.subscribe(options, handler);
+          clearTimeout(retryTimeout);
+        }, 1000);
       });
   }
 
@@ -128,4 +132,22 @@ export function addGraphQLSubscriptions(networkInterface, spdyClient) {
       spdyClient.unsubscribe(id);
     }
   });
+}
+
+export class SSELink extends ApolloLink {
+  constructor(paramsOrClient) {
+    super();
+    this.subscriptionClient = paramsOrClient;
+  }
+
+  request(operation) {
+    return new Observable(observer => {
+      const subscription = this.subscriptionClient.subscribe(
+        Object.assign(operation, {query: print(operation.query)}),
+        data => observer.next({data})
+      );
+
+      return () => this.subscriptionClient.unsubscribe(subscription);
+    });
+  }
 }
