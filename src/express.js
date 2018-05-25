@@ -34,7 +34,7 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
     const subscription = Object.assign(
       {},
       req.body,
-      subscriptionOptions.onSubscribe && subscriptionOptions.onSubscribe(req)
+      onSubscribe && onSubscribe(req)
     );
     let connectionSubscriptionId = 0;
 
@@ -53,7 +53,6 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
   connectionOptions.express.get(`${connectionOptions.path}/:id`, (req, res) => {
     const connectionSubscriptionId = req.params.id;
     res.setHeader('Content-Type', 'text/event-stream');
-    subscriptionOptions.onConnect && subscriptionOptions.onConnect(req);
     req.connection.on('close', () => {
       if (
         subscriptionOptions.subscriptionManager.subscriptions[
@@ -64,7 +63,7 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
           connectionSubscriptionId
         );
       }
-      subscriptionOptions.onDisconnect && subscriptionOptions.onDisconnect(req);
+      onUnsubscribe && onUnsubscribe(req);
     });
 
     emitter.on(`event-${connectionSubscriptionId}`, (error, data) => {
@@ -227,7 +226,6 @@ export class SubscriptionManager {
       this.pubsub.unsubscribe(internalId);
     });
     delete this.subscriptions[subId];
-    subscriptionOptions.onUnsubscribe && subscriptionOptions.onUnsubscribe(req);
   }
 }
 
