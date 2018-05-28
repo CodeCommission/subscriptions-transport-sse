@@ -18,8 +18,6 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
     subscriptionManager,
     onSubscribe,
     onUnsubscribe,
-    onConnect,
-    onDisconnect,
     keepAlive
   } = subscriptionOptions;
   if (!subscriptionManager)
@@ -31,11 +29,7 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
   emitter.setMaxListeners(0);
 
   connectionOptions.express.post(connectionOptions.path, (req, res) => {
-    const subscription = Object.assign(
-      {},
-      req.body,
-      onSubscribe && onSubscribe(req)
-    );
+    const subscription = Object.assign({}, req.body);
     let connectionSubscriptionId = 0;
 
     subscription.callback = (error, data) => {
@@ -46,6 +40,7 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
       .subscribe(subscription)
       .then(subId => {
         connectionSubscriptionId = subId;
+        onSubscribe && onSubscribe(req, subId);
         res.send({subId: subId});
       });
   });
@@ -63,7 +58,7 @@ export function SubscriptionServer(subscriptionOptions, connectionOptions) {
           connectionSubscriptionId
         );
       }
-      onUnsubscribe && onUnsubscribe(req);
+      onUnsubscribe && onUnsubscribe(req, connectionSubscriptionId);
     });
 
     emitter.on(`event-${connectionSubscriptionId}`, (error, data) => {
