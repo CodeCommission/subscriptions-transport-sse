@@ -1,6 +1,6 @@
 # subscriptions-transport-sse
 
-A GraphQL Server-Side-Evenet (SSE) server and client to facilitate GraphQL subscriptions.
+A GraphQL Server-Side-Events (SSE) server and client to facilitate GraphQL subscriptions.
 
 > That's an API compatible SSE transport implementation of [subscriptions-transport-ws](https://github.com/apollographql/subscriptions-transport-ws).
 
